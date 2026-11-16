@@ -15,7 +15,10 @@ export const config = {
   aiServiceUrl: env('AI_SERVICE_URL', 'http://localhost:8000').replace(/\/$/, ''),
 
   // Browser origins allowed to call this API (comma-separated in .env).
-  corsOrigins: env('ADMIN_FRONTEND_ORIGIN', 'http://localhost:5174').split(',').map((s) => s.trim()),
+  corsOrigins: env('ADMIN_FRONTEND_ORIGIN', 'http://localhost:5174,http://127.0.0.1:5174')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
 
   // First desk account, created at start-up when the admins collection is empty.
   seed: {

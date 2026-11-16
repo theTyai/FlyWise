@@ -98,11 +98,26 @@ export default function FlightPass({ offer, category, reason, score, action, not
           </div>
         )}
 
-        <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-ink-soft">
-          <li className="flex items-center gap-1.5"><Luggage className="size-3.5 text-ink-faint" aria-hidden="true" /> Cabin bag {offer.baggage?.cabin || '7 kg'}</li>
-          <li className="flex items-center gap-1.5"><Luggage className="size-3.5 text-ink-faint" aria-hidden="true" /> Checked bag {offer.baggage?.checked || '15 kg'}</li>
-          <li className="flex items-center gap-1.5"><Clock className="size-3.5 text-ink-faint" aria-hidden="true" /> {CABIN_LABEL[offer.cabinClass] || offer.cabinClass}</li>
-        </ul>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line/60 pt-3">
+          <ul className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-ink-soft">
+            <li className="flex items-center gap-1.5"><Luggage className="size-3.5 text-ink-faint" aria-hidden="true" /> Cabin bag {offer.baggage?.cabin || '7 kg'}</li>
+            <li className="flex items-center gap-1.5"><Luggage className="size-3.5 text-ink-faint" aria-hidden="true" /> Checked bag {offer.baggage?.checked || '15 kg'}</li>
+            <li className="flex items-center gap-1.5"><Clock className="size-3.5 text-ink-faint" aria-hidden="true" /> {CABIN_LABEL[offer.cabinClass] || offer.cabinClass}</li>
+          </ul>
+          {offer.availableSeats !== undefined && (
+            <span className={cx(
+              'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold',
+              offer.availableSeats === 0 ? 'bg-stop-50 text-stop-700 border border-stop-200' :
+              offer.availableSeats <= 5 ? 'bg-flare-50 text-flare-700 border border-flare-200' :
+              'bg-mint-50 text-mint-700 border border-mint-200'
+            )}>
+              <span className={cx('size-1.5 rounded-full', offer.availableSeats === 0 ? 'bg-stop-600' : offer.availableSeats <= 5 ? 'bg-flare-600' : 'bg-mint-600')} />
+              {offer.availableSeats === 0 ? 'Sold out' :
+               offer.availableSeats <= 5 ? `Only ${offer.availableSeats} seat${offer.availableSeats > 1 ? 's' : ''} left` :
+               `${offer.availableSeats} live seats left`}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="pass-stub flex flex-row items-center justify-between gap-4 p-5 sm:p-6 md:flex-col md:items-stretch md:justify-center">
@@ -111,6 +126,11 @@ export default function FlightPass({ offer, category, reason, score, action, not
           <p className="board text-[2.5rem] leading-none font-extrabold text-ink">{money(offer.pricePerPassenger, offer.currency)}</p>
           {offer.passengerCount > 1 && (
             <p className="mt-1 text-xs text-ink-soft">{money(offer.price, offer.currency)} total</p>
+          )}
+          {offer.availableSeats !== undefined && (
+            <p className={cx('mt-1.5 text-xs font-semibold', offer.availableSeats === 0 ? 'text-stop-600' : offer.availableSeats <= 5 ? 'text-flare-600' : 'text-mint-700')}>
+              {offer.availableSeats === 0 ? '0 seats available' : `${offer.availableSeats} seats remaining`}
+            </p>
           )}
         </div>
         {action}

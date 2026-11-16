@@ -136,3 +136,23 @@ export async function postInternal(url, key, body, timeoutMs = 3000) {
     return false;
   }
 }
+
+// Validates whether an origin is allowed.
+// Supports configured origins and automatically permits local development origins
+// (localhost, 127.0.0.1, [::1], and private LAN IPs) on any port.
+export function isAllowedOrigin(origin, allowedOrigins = []) {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  if (/^https?:\/\/(localhost|127\.0\.0\.1|\[::1\]|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+)(:\d+)?$/.test(origin)) {
+    return true;
+  }
+  return false;
+}
+
+// Generates Express/Socket.IO-compatible CORS options
+export function corsOptions(allowedOrigins = []) {
+  return {
+    origin: (origin, callback) => callback(null, isAllowedOrigin(origin, allowedOrigins)),
+    credentials: true,
+  };
+}

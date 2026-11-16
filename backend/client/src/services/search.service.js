@@ -5,7 +5,7 @@
 //   MongoDB            ->  the search, its offers and the picks
 import { isValidId, mongoose } from '@flywise/shared/db.js';
 import { ApiError } from '@flywise/shared/http.js';
-import { FlightOffer, Search } from '@flywise/shared/models.js';
+import { FlightOffer, Search, SeatInventory, getSettings } from '@flywise/shared/models.js';
 import { istHour } from '@flywise/shared/time.js';
 import { requestRecommendations } from '../integrations/ai-service/client.js';
 import { getFlightProvider } from '../integrations/flight-provider/index.js';
@@ -45,12 +45,56 @@ export async function runSearch(query, user) {
 
   // 1. Live or sample offers, already converted to the internal flight shape.
   const normalised = await provider.search({ origin, destination, departureDate, passengers, cabinClass });
-  const offers = normalised.map((offer) => ({ ...offer, _id: new mongoose.Types.ObjectId(), searchId }));
 
-  // 2. Rank them.
+  // 2. Query and initialize live seat inventory for each flight
+  const settings = await getSettings();
+  const defaultSeats = settings?.defaultSimulatedSeats || 12;
+  const flightKeys = normalised.map((o) => o.flightKey);
+  const existingInventory = flightKeys.length ? await SeatInventory.find({ flightKey: { $in: flightKeys } }) : [];
+  const invMap = new Map(existingInventory.map((i) => [i.flightKey, i]));
+
+  const toInsert = [];
+  for (const offer of normalised) {
+    if (!invMap.has(offer.flightKey)) {
+      toInsert.push({
+        flightKey: offer.flightKey,
+        flightNumber: offer.flightNumber,
+        airline: offer.airline,
+        origin: offer.origin,
+        destination: offer.destination,
+        departureTime: offer.departureTime,
+        totalSeats: defaultSeats,
+        availableSeats: defaultSeats,
+        inventoryMode: 'SIMULATED',
+      });
+    }
+  }
+
+  if (toInsert.length) {
+    try {
+      const created = await SeatInventory.insertMany(toInsert, { ordered: false });
+      for (const item of created) invMap.set(item.flightKey, item);
+    } catch {
+      const reQuery = await SeatInventory.find({ flightKey: { $in: toInsert.map((i) => i.flightKey) } });
+      for (const item of reQuery) invMap.set(item.flightKey, item);
+    }
+  }
+
+  const offers = normalised.map((offer) => {
+    const inv = invMap.get(offer.flightKey);
+    return {
+      ...offer,
+      _id: new mongoose.Types.ObjectId(),
+      searchId,
+      availableSeats: inv ? inv.availableSeats : defaultSeats,
+      totalSeats: inv ? inv.totalSeats : defaultSeats,
+    };
+  });
+
+  // 3. Rank them.
   const ranking = await rank(offers, preferences, naturalLanguage);
 
-  // 3. Persist the search, its offers and the picks.
+  // 4. Persist the search, its offers and the picks.
   const search = await Search.create({
     _id: searchId,
     userId: user?._id || null,
@@ -82,9 +126,25 @@ async function loadSearch(id) {
 export async function getSearch(id) {
   const search = await loadSearch(id);
   const offers = await FlightOffer.find({ searchId: search._id }).sort({ departureTime: 1 });
+
+  // Refresh live seat availability directly from current database state
+  const flightKeys = offers.map((o) => o.flightKey);
+  const liveInventory = flightKeys.length ? await SeatInventory.find({ flightKey: { $in: flightKeys } }) : [];
+  const invMap = new Map(liveInventory.map((i) => [i.flightKey, i]));
+
+  const liveOffers = offers.map((o) => {
+    const obj = o.toObject();
+    const inv = invMap.get(obj.flightKey);
+    if (inv) {
+      obj.availableSeats = inv.availableSeats;
+      obj.totalSeats = inv.totalSeats;
+    }
+    return obj;
+  });
+
   return {
     search: serializeSearch(search),
-    offers: offers.map((o) => serializeOffer(o)),
+    offers: liveOffers.map((o) => serializeOffer(o)),
     recommendations: search.recommendations.map(serializeRecommendation),
   };
 }
@@ -103,8 +163,17 @@ export async function getOffer(id) {
   if (!offer) throw new ApiError(404, 'OFFER_NOT_FOUND', 'This fare no longer exists. Search again.');
   const search = await Search.findById(offer.searchId);
   const pick = search?.recommendations.find((r) => String(r.offerId) === String(offer._id));
+
+  // Fetch real-time available seats
+  const inv = await SeatInventory.findOne({ flightKey: offer.flightKey });
+  const offerObj = offer.toObject();
+  if (inv) {
+    offerObj.availableSeats = inv.availableSeats;
+    offerObj.totalSeats = inv.totalSeats;
+  }
+
   return {
-    offer: serializeOffer(offer),
+    offer: serializeOffer(offerObj),
     search: search ? serializeSearch(search) : null,
     recommendation: pick ? serializeRecommendation(pick) : null,
   };

@@ -84,6 +84,18 @@ export default function BookingNew() {
 
       <form onSubmit={submit} noValidate className="mt-6 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_23rem]">
         <div className="rounded-3xl bg-white p-6 shadow-pass sm:p-8">
+          {offer.availableSeats !== undefined && (
+            <div className="mb-6 flex items-center justify-between rounded-2xl border border-mint-200 bg-mint-50/80 px-4 py-3 text-sm text-mint-900">
+              <span className="flex items-center gap-2 font-semibold">
+                <span className="size-2 rounded-full bg-mint-600 animate-pulse" />
+                Live Availability: {offer.availableSeats} seats remaining
+              </span>
+              <span className="rounded bg-white px-2 py-0.5 font-mono text-xs font-bold text-mint-800 border border-mint-200">
+                ACID Verified
+              </span>
+            </div>
+          )}
+
           {offer.expired && (
             <Notice tone="error" title="This fare has expired" className="mb-6" action={<Button size="sm" variant="navy" onClick={() => navigate('/')}>Search again</Button>}>
               Fares are held for 30 minutes.
@@ -92,13 +104,12 @@ export default function BookingNew() {
           {failure && <Notice tone="error" className="mb-6">{failure}</Notice>}
           <TravellerFields passengers={passengers} contact={contact} onPassengers={setPassengers} onContact={setContact} errors={errors} />
 
-          <div className="mt-8 rounded-2xl bg-wait-50 p-4">
-            <label className="flex items-start gap-3 text-[15px] leading-relaxed text-ink">
+          <div className="mt-8 rounded-2xl bg-signal-50/60 border border-signal-100 p-4">
+            <label className="flex items-start gap-3 text-[15px] leading-relaxed text-ink cursor-pointer">
               <input type="checkbox" className="mt-1 size-4 shrink-0 accent-signal-600" checked={agreed} onChange={(event) => setAgreed(event.target.checked)}
                 aria-invalid={Boolean(errors.acknowledgeSimulated)} />
               <span>
-                I understand this sends a <strong>booking request</strong>. An administrator approves it against simulated seat inventory.
-                No airline ticket is issued and no payment is taken.
+                I confirm the traveller details are correct. <strong>Live seats will be allocated and guaranteed immediately</strong> upon submission without waiting for manual admin review.
               </span>
             </label>
             {errors.acknowledgeSimulated && <p className="mt-2 pl-7 text-sm text-stop-700">{errors.acknowledgeSimulated}</p>}
@@ -128,16 +139,22 @@ export default function BookingNew() {
                   <dt className="text-ink-soft">Bags</dt>
                   <dd>{offer.baggage.cabin} cabin, {offer.baggage.checked} checked</dd>
                 </div>
+                {offer.availableSeats !== undefined && (
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-ink-soft">Seats remaining</dt>
+                    <dd className="font-semibold text-mint-700">{offer.availableSeats} seats</dd>
+                  </div>
+                )}
                 <div className="flex items-baseline justify-between gap-4 border-t border-line pt-3">
                   <dt className="font-semibold">Total fare</dt>
                   <dd className="board text-[2rem] leading-none font-semibold">{money(offer.price, offer.currency)}</dd>
                 </div>
               </dl>
-              <Button type="submit" size="lg" loading={busy} disabled={offer.expired} className="mt-5 w-full btn-gradient">
-                {busy ? 'Submitting Request...' : 'Request Booking'}
+              <Button type="submit" size="lg" loading={busy} disabled={offer.expired || (offer.availableSeats !== undefined && offer.availableSeats < offer.passengerCount)} className="mt-5 w-full btn-gradient">
+                {busy ? 'Reserving Seats & Booking...' : 'Instant Book & Confirm'}
               </Button>
               <p className="mt-2.5 text-center text-xs text-ink-faint">
-                No immediate payment required • Subject to admin seat verification
+                Instant Confirmation • ACID Atomic Seat Guarantee
               </p>
             </div>
           </div>

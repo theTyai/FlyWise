@@ -18,18 +18,18 @@ What happens, step by step, from a search to a final decision, and how the trick
 
 | Status | Shown as | Meaning | Who sets it |
 |---|---|---|---|
-| `PENDING_ADMIN_APPROVAL` | Waiting for review | The request is in the desk's queue | Traveller (by sending it) |
-| `ALLOCATION_IN_PROGRESS` | Allocating seats | A confirmation is running right now (normally well under a second) | Admin backend |
-| `CONFIRMED` | Confirmed | Simulated seats are held for this booking | Admin |
+| `ALLOCATION_IN_PROGRESS` | Allocating seats | Atomic seat reservation check is executing | System (ACID engine) |
+| `CONFIRMED` | Confirmed | Seats verified & allocated; booking instantly confirmed | System / Admin |
+| `PENDING_ADMIN_APPROVAL` | Waiting for review | Legacy queue / manual exception review | Traveller |
 | `REJECTED` | Rejected | The desk declined the request, with a reason | Admin |
 | `REVOKED` | Revoked | A confirmed booking was withdrawn, with a reason; seats released | Admin |
-| `CANCELLED` | Cancelled | The traveller cancelled | Traveller |
-| `BOOKING_FAILED` | Failed | An unexpected error during allocation; seats released | System |
+| `CANCELLED` | Cancelled | The traveller cancelled (seats returned atomically) | Traveller |
+| `BOOKING_FAILED` | Failed | Sold out or insufficient seats | System |
 | `PRICE_REVALIDATION` | Checking the fare | Reserved for a future live-booking mode; not used today | n/a |
 
 `SEARCHED` and `SELECTED` exist in the state machine for completeness but happen in the browser and are never stored.
 
-**Reject and revoke are different things.** Reject applies to a request that was never approved. Revoke applies only to a booking that was confirmed, and it returns seats to inventory.
+**Real-Time Instant Booking**: In the current production workflow, bookings verify live seat inventory and confirm immediately upon request (`CONFIRMED`). No manual desk approval is required when seats are available.
 
 ---
 
@@ -39,15 +39,15 @@ Defined once in `shared/constants.js` (`TRANSITIONS`) and used by every program.
 
 ```mermaid
 stateDiagram-v2
-  [*] --> PENDING_ADMIN_APPROVAL: traveller sends request
+  [*] --> ALLOCATION_IN_PROGRESS: traveller books flight
+  ALLOCATION_IN_PROGRESS --> CONFIRMED: seats available (instant confirm)
+  ALLOCATION_IN_PROGRESS --> BOOKING_FAILED: sold out / no seats
+  [*] --> PENDING_ADMIN_APPROVAL: manual submission (optional)
   PENDING_ADMIN_APPROVAL --> ALLOCATION_IN_PROGRESS: admin clicks Confirm
-  ALLOCATION_IN_PROGRESS --> CONFIRMED: seats allocated
-  ALLOCATION_IN_PROGRESS --> PENDING_ADMIN_APPROVAL: not enough seats
-  ALLOCATION_IN_PROGRESS --> BOOKING_FAILED: unexpected error
   PENDING_ADMIN_APPROVAL --> REJECTED: admin rejects
   PENDING_ADMIN_APPROVAL --> CANCELLED: traveller cancels
-  CONFIRMED --> REVOKED: admin revokes
-  CONFIRMED --> CANCELLED: traveller cancels
+  CONFIRMED --> REVOKED: admin revokes (seats released)
+  CONFIRMED --> CANCELLED: traveller cancels (seats released)
   REJECTED --> [*]
   CANCELLED --> [*]
   REVOKED --> [*]

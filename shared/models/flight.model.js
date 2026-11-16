@@ -36,6 +36,8 @@ export const flightFields = {
   pricePerPassenger: { type: Number, required: true, min: 0 },
   passengerCount: { type: Number, required: true, min: 1 },
   price: { type: Number, required: true, min: 0 }, // total for all passengers
+  availableSeats: { type: Number, default: 12, min: 0 },
+  totalSeats: { type: Number, default: 12, min: 0 },
 };
 
 const flightOfferSchema = new Schema({

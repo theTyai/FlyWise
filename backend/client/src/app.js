@@ -3,7 +3,7 @@
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
-import { errorHandler, notFound, sanitizeRequest } from '@flywise/shared/http.js';
+import { corsOptions, errorHandler, notFound, sanitizeRequest } from '@flywise/shared/http.js';
 import { config } from './config/index.js';
 import { health } from './controllers/health.controller.js';
 import { getFlightProvider } from './integrations/flight-provider/index.js';
@@ -15,8 +15,8 @@ export function createApp() {
 
   const app = express();
   app.disable('x-powered-by');
-  app.use(helmet()); // security headers
-  app.use(cors({ origin: config.corsOrigins })); // only the traveller frontend may call this API
+  app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } })); // allow cross-origin API access
+  app.use(cors(corsOptions(config.corsOrigins))); // allow traveller frontend origins
   app.use(express.json({ limit: '100kb' }));
   app.use(sanitizeRequest); // strip "$" and "." keys (NoSQL-injection guard)
 

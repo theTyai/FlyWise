@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import {
   AIRPORTS, BOOKING_STATUS as S, STATUS_META, STORED_STATUSES, TERMINAL_STATUSES, TRANSITIONS, canTransition,
 } from '../constants.js';
-import { escapeRegex, paginate, redact, sanitizeRequest } from '../http.js';
+import { corsOptions, escapeRegex, isAllowedOrigin, paginate, redact, sanitizeRequest } from '../http.js';
 
 test('booking state machine allows only the documented transitions', () => {
   assert.ok(canTransition(S.PENDING_ADMIN_APPROVAL, S.ALLOCATION_IN_PROGRESS));
@@ -51,4 +51,25 @@ test('log redaction, regex escaping and pagination helpers', () => {
   assert.equal(new RegExp(escapeRegex('.*')).test('anything'), false);
   assert.deepEqual(paginate({ page: '3', limit: '10' }), { page: 3, limit: 10, skip: 20 });
   assert.deepEqual(paginate({ page: '-1', limit: '9999' }), { page: 1, limit: 100, skip: 0 });
+});
+
+test('cors and origin validation permits localhost, 127.0.0.1, IPv6 loopback, and LAN IPs', () => {
+  assert.equal(isAllowedOrigin(undefined), true);
+  assert.equal(isAllowedOrigin(''), true);
+  assert.equal(isAllowedOrigin('http://localhost:5173'), true);
+  assert.equal(isAllowedOrigin('http://127.0.0.1:5173'), true);
+  assert.equal(isAllowedOrigin('http://[::1]:5173'), true);
+  assert.equal(isAllowedOrigin('http://192.168.1.100:5173'), true);
+  assert.equal(isAllowedOrigin('http://custom-domain.com', ['http://custom-domain.com']), true);
+  assert.equal(isAllowedOrigin('http://unauthorized-domain.com', ['http://custom-domain.com']), false);
+
+  const options = corsOptions(['http://custom-domain.com']);
+  options.origin('http://127.0.0.1:5173', (err, allow) => {
+    assert.equal(err, null);
+    assert.equal(allow, true);
+  });
+  options.origin('http://evil.com', (err, allow) => {
+    assert.equal(err, null);
+    assert.equal(allow, false);
+  });
 });

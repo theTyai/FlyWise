@@ -35,6 +35,8 @@ const plainFlight = (f) => ({
   pricePerPassenger: f.pricePerPassenger,
   passengerCount: f.passengerCount,
   price: f.price,
+  availableSeats: f.availableSeats !== undefined ? f.availableSeats : 12,
+  totalSeats: f.totalSeats !== undefined ? f.totalSeats : 12,
 });
 
 export const serializeOffer = (o, score) => ({

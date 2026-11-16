@@ -25,10 +25,12 @@ export async function getSettings() {
 
 // FWB-2026-00001 style references. $inc on one document is atomic, so two requests
 // created at the same instant can never receive the same number.
-export async function nextBookingReference() {
+export async function nextBookingReference(session = null) {
   const year = new Date().getFullYear();
   const counter = await Counter.findOneAndUpdate(
-    { _id: `booking-${year}` }, { $inc: { seq: 1 } }, { new: true, upsert: true },
+    { _id: `booking-${year}` },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true, ...(session ? { session } : {}) },
   );
   return `FWB-${year}-${String(counter.seq).padStart(5, '0')}`;
 }

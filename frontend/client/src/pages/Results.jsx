@@ -36,6 +36,7 @@ function CompareTable({ picks }) {
     { label: 'Departs', value: (o) => time(o.departureTime) },
     { label: 'Arrives', value: (o) => time(o.arrivalTime) },
     { label: 'Checked bag', value: (o) => o.baggage?.checked || '15 kg' },
+    { label: 'Live seats left', value: (o) => (o.availableSeats === 0 ? 'Sold out' : `${o.availableSeats} seats`) },
   ];
   return (
     <div className="overflow-x-auto rounded-2xl border border-line bg-white shadow-pass">
@@ -270,10 +271,12 @@ export default function Results() {
                   action={(
                     <Button
                       variant={category === 'BEST_OVERALL' ? 'primary' : 'navy'}
-                      disabled={expired}
+                      disabled={expired || (offer.availableSeats !== undefined && offer.availableSeats < (search?.passengers || 1))}
                       onClick={() => select(offer)}
                     >
-                      Request this flight
+                      {offer.availableSeats === 0 ? 'Sold Out' :
+                       (offer.availableSeats !== undefined && offer.availableSeats < (search?.passengers || 1)) ? 'Not Enough Seats' :
+                       'Book this flight'}
                     </Button>
                   )}
                 />
@@ -433,6 +436,19 @@ export default function Results() {
                           <p className="font-bold text-ink">{offer.airline}</p>
                           <p className="board text-sm font-semibold text-ink-soft">{offer.flightNumber}</p>
                           {category && <RoleTag category={category} className="mt-1.5" />}
+                          {offer.availableSeats !== undefined && (
+                            <span className={cx(
+                              'mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold',
+                              offer.availableSeats === 0 ? 'bg-stop-50 text-stop-700' :
+                              offer.availableSeats <= 5 ? 'bg-flare-50 text-flare-700' :
+                              'bg-mint-50 text-mint-700'
+                            )}>
+                              <span className={cx('size-1.5 rounded-full', offer.availableSeats === 0 ? 'bg-stop-600' : offer.availableSeats <= 5 ? 'bg-flare-600' : 'bg-mint-600')} />
+                              {offer.availableSeats === 0 ? 'Sold out' :
+                               offer.availableSeats <= 5 ? `Only ${offer.availableSeats} left` :
+                               `${offer.availableSeats} seats left`}
+                            </span>
+                          )}
                         </div>
 
                         <RouteDisplay flight={offer} size="sm" />
@@ -447,11 +463,11 @@ export default function Results() {
                           <Button
                             size="sm"
                             variant="primary"
-                            disabled={expired}
+                            disabled={expired || (offer.availableSeats !== undefined && offer.availableSeats < (search?.passengers || 1))}
                             onClick={() => select(offer)}
-                            aria-label={`Request ${offer.airline} ${offer.flightNumber}`}
+                            aria-label={`Book ${offer.airline} ${offer.flightNumber}`}
                           >
-                            Request
+                            {offer.availableSeats === 0 ? 'Sold out' : 'Book'}
                           </Button>
                         </div>
                       </li>

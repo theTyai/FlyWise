@@ -18,7 +18,10 @@ export const config = {
   adminBackendUrl: env('ADMIN_BACKEND_URL', 'http://localhost:5001').replace(/\/$/, ''),
 
   // Browser origins allowed to call this API (comma-separated in .env).
-  corsOrigins: env('USER_FRONTEND_ORIGIN', 'http://localhost:5173').split(',').map((s) => s.trim()),
+  corsOrigins: env('USER_FRONTEND_ORIGIN', 'http://localhost:5173,http://127.0.0.1:5173')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
 
   // Flight provider: "real_schedule" (real airline schedules, no token needed) or "mock".
   flightProvider: env('FLIGHT_PROVIDER', 'real_schedule').toLowerCase(),

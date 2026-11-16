@@ -16,5 +16,15 @@ export default defineConfig({
     alias: { '@shared': path.resolve(repo, 'shared') },
     dedupe: ['react', 'react-dom'],
   },
-  server: { port: 5173, strictPort: true, fs: { allow: [repo] } },
+  server: {
+    port: 5173,
+    strictPort: true,
+    fs: { allow: [repo] },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+    },
+  },
 });

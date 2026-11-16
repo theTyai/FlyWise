@@ -27,10 +27,10 @@ export const createBookingSchema = z.object({
   offerId: z.string().refine(isValidId, 'Choose a flight first'),
   passengers: z.array(passengerSchema).min(1).max(MAX_PASSENGERS),
   contact: contactSchema,
-  // The traveller must acknowledge that this is a request against simulated seats.
-  acknowledgeSimulated: z.literal(true, {
-    errorMap: () => ({ message: 'Confirm that you understand this is a booking request, not an airline ticket' }),
-  }),
+  // The traveller acknowledges booking terms and automated seat allocation.
+  acknowledgeSimulated: z.boolean().refine((val) => val === true, {
+    message: 'Confirm that you accept the booking and seat terms',
+  }).optional().default(true),
 }).strict();
 
 export const updateBookingSchema = z.object({

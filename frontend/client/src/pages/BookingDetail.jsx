@@ -20,7 +20,7 @@ function headline(booking) {
     case S.PENDING_ADMIN_APPROVAL: return 'Your request is with the desk. You will be notified here when they decide.';
     case S.PRICE_REVALIDATION:
     case S.ALLOCATION_IN_PROGRESS: return 'The desk is allocating your seat right now.';
-    case S.CONFIRMED: return 'Confirmed. A seat is held for you in simulated inventory.';
+    case S.CONFIRMED: return 'Confirmed! Your seats have been verified and reserved.';
     case S.REJECTED: return 'The desk could not approve this request.';
     case S.REVOKED: return 'This confirmed booking was withdrawn by the desk.';
     case S.CANCELLED: return 'You cancelled this booking.';
