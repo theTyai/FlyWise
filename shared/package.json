@@ -1,0 +1,23 @@
+{
+  "name": "@flywise/shared",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Contracts shared by every FlyWise service: constants, database models, HTTP helpers, design tokens",
+  "exports": {
+    "./constants.js": "./constants.js",
+    "./models.js": "./models/index.js",
+    "./http.js": "./http.js",
+    "./db.js": "./db.js",
+    "./env.js": "./env.js",
+    "./time.js": "./time.js",
+    "./design/theme.css": "./design/theme.css"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "mongoose": "^8.8.0"
+  }
+}

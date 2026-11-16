@@ -1,0 +1,5 @@
+@import "tailwindcss";
+@import "../../../shared/design/theme.css";
+
+/* Components that live outside this app's folder still need their classes generated. */
+@source "../../../shared/ui";
