@@ -1,9 +1,9 @@
 {
-  "name": "@flywise/user-backend",
+  "name": "@flywise/client-backend",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "FlyWise user backend: traveller auth, flight search, booking requests, notifications",
+  "description": "FlyWise client backend: traveller auth, flight search, booking requests, notifications",
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",

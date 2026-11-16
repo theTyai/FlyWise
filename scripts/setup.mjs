@@ -67,7 +67,7 @@ if (!python) {
   }
   const venv = venvPython();
   if (venv && run(venv, ['-m', 'pip', 'install', '--quiet', '--disable-pip-version-check', '-r', 'requirements.txt'], { cwd: AI_DIR })) {
-    ok(`Python ${python.version} virtual environment ready in services/ai-recommendation/.venv`);
+    ok(`Python ${python.version} virtual environment ready in ai/.venv`);
   } else {
     fail('Could not install the Python packages. See the messages above.');
     problems.push('Python packages not installed: the AI service will not start (search still works without it).');

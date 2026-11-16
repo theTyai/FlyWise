@@ -5,23 +5,21 @@
   "description": "FlyWise AI - intelligent flight discovery and booking platform (academic minor project)",
   "workspaces": [
     "shared",
-    "apps/*"
+    "backend/*",
+    "frontend/*"
   ],
   "scripts": {
     "setup": "node scripts/setup.mjs",
-    "dev": "concurrently -n user-api,admin-api,user-web,admin-web,ai -c blue,magenta,cyan,green,yellow \"npm run dev -w @flywise/user-backend\" \"npm run dev -w @flywise/admin-backend\" \"npm run dev -w @flywise/user-frontend\" \"npm run dev -w @flywise/admin-frontend\" \"npm run dev:ai\"",
-    "dev:node": "concurrently -n user-api,admin-api,user-web,admin-web -c blue,magenta,cyan,green \"npm run dev -w @flywise/user-backend\" \"npm run dev -w @flywise/admin-backend\" \"npm run dev -w @flywise/user-frontend\" \"npm run dev -w @flywise/admin-frontend\"",
+    "dev": "concurrently -n client-api,admin-api,client-web,admin-web,ai -c blue,magenta,cyan,green,yellow \"npm run dev -w @flywise/client-backend\" \"npm run dev -w @flywise/admin-backend\" \"npm run dev -w @flywise/client-frontend\" \"npm run dev -w @flywise/admin-frontend\" \"npm run dev:ai\"",
+    "dev:node": "concurrently -n client-api,admin-api,client-web,admin-web -c blue,magenta,cyan,green \"npm run dev -w @flywise/client-backend\" \"npm run dev -w @flywise/admin-backend\" \"npm run dev -w @flywise/client-frontend\" \"npm run dev -w @flywise/admin-frontend\"",
     "dev:ai": "node scripts/run-ai.mjs",
-    "build": "npm run build -w @flywise/user-frontend && npm run build -w @flywise/admin-frontend",
+    "build": "npm run build -w @flywise/client-frontend && npm run build -w @flywise/admin-frontend",
     "test": "npm test --workspaces --if-present",
     "test:ai": "node scripts/run-ai.mjs --test",
     "check": "node scripts/check.mjs",
     "seed:admin": "npm run seed -w @flywise/admin-backend",
     "seed:demo": "npm run seed:demo -w @flywise/admin-backend",
-    "db:reset": "npm run db:reset -w @flywise/admin-backend --",
-    "docker:db": "docker compose up -d mongo",
-    "docker:up": "docker compose --profile full up --build",
-    "docker:down": "docker compose --profile full down"
+    "db:reset": "npm run db:reset -w @flywise/admin-backend --"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"

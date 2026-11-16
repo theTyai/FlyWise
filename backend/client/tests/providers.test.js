@@ -1,9 +1,10 @@
-// Run: npm test -w @flywise/user-backend   (no database or network needed)
+// Run: npm test -w @flywise/client-backend   (no database or network needed)
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { AIRPORT_CODES } from '@flywise/shared/constants.js';
 import { isoDurationToMinutes, normaliseDuffelOffer } from '../src/integrations/flight-provider/duffelProvider.js';
 import { generateMockOffers } from '../src/integrations/flight-provider/mockProvider.js';
+import { searchRealSchedules, realScheduleProvider } from '../src/integrations/flight-provider/realScheduleProvider.js';
 import { fallbackRecommendations } from '../src/services/fallbackRanking.service.js';
 
 const query = { origin: 'BHO', destination: 'DEL', departureDate: '2030-11-25', passengers: 2, cabinClass: 'ECONOMY' };
@@ -45,6 +46,25 @@ test('sample provider handles every supported airport pair and rejects bad input
   }
   assert.deepEqual(generateMockOffers({ ...query, destination: 'BHO' }, NOW), []);
   assert.deepEqual(generateMockOffers({ ...query, origin: 'XXX' }, NOW), []);
+});
+
+test('real-schedule provider generates realistic flights with authentic airline carriers', async () => {
+  const offers = await realScheduleProvider.search(query, NOW);
+  assert.ok(offers.length >= 4, 'expected real timetable offers');
+  for (const offer of offers) {
+    assert.equal(offer.provider, 'REAL_SCHEDULE');
+    assert.equal(offer.origin, 'BHO');
+    assert.equal(offer.destination, 'DEL');
+    assert.ok(['IndiGo', 'Air India', 'Vistara', 'Akasa Air', 'SpiceJet', 'Air India Express'].includes(offer.airline));
+    assert.ok(offer.flightNumber.includes('-'));
+    assert.ok(offer.pricePerPassenger > 1000);
+    assert.equal(offer.price, offer.pricePerPassenger * 2);
+    assert.ok(offer.durationMinutes > 30);
+    assert.ok(offer.baggage.cabin && offer.baggage.checked);
+    assert.equal(offer.segments.length, offer.stops + 1);
+    assert.ok(offer.expiresAt > NOW);
+  }
+  assert.equal(new Set(offers.map((o) => o.flightKey)).size, offers.length, 'unique flight keys');
 });
 
 test('Duffel offers are converted to the internal flight shape', () => {

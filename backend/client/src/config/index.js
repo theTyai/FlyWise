@@ -20,7 +20,6 @@ export const config = {
   // Browser origins allowed to call this API (comma-separated in .env).
   corsOrigins: env('USER_FRONTEND_ORIGIN', 'http://localhost:5173').split(',').map((s) => s.trim()),
 
-  // "mock" (generated sample fares) or "duffel" (live offers; needs DUFFEL_ACCESS_TOKEN).
-  flightProvider: env('FLIGHT_PROVIDER', 'mock').toLowerCase(),
-  duffelToken: env('DUFFEL_ACCESS_TOKEN', ''),
+  // Flight provider: "real_schedule" (real airline schedules, no token needed) or "mock".
+  flightProvider: env('FLIGHT_PROVIDER', 'real_schedule').toLowerCase(),
 };

@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-export const AI_DIR = path.join(ROOT, 'services', 'ai-recommendation');
+export const AI_DIR = path.join(ROOT, 'ai');
 export const isWindows = process.platform === 'win32';
 
 const colour = (code) => (text) => (process.stdout.isTTY ? `\x1b[${code}m${text}\x1b[0m` : text);

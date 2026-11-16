@@ -17,7 +17,7 @@ const segmentSchema = new Schema({
 // The normalised flight - the one internal shape every flight provider is converted to.
 // Exported because a booking request stores a snapshot with exactly these fields.
 export const flightFields = {
-  provider: { type: String, enum: ['MOCK', 'DUFFEL'], required: true },
+  provider: { type: String, enum: ['REAL_SCHEDULE', 'LIVE', 'MOCK', 'DUFFEL'], required: true },
   providerOfferId: { type: String, required: true },
   flightKey: { type: String, required: true }, // flight number(s) + date; identifies one simulated inventory record
   airline: { type: String, required: true },

@@ -1,9 +1,9 @@
 {
-  "name": "@flywise/user-frontend",
+  "name": "@flywise/client-frontend",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "FlyWise traveller app: search, AI recommendations, booking requests, trips",
+  "description": "FlyWise client frontend: search, AI recommendations, booking requests, trips",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
