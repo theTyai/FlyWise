@@ -6,6 +6,7 @@
 // The desk decisions are made through the real decision service, so the audit log,
 // notifications and seat counts are exactly what the running app would produce.
 // Safe to run twice: it stops if the demo travellers already exist.
+process.env.FLYWISE_SEEDING = 'true';
 import bcrypt from 'bcryptjs';
 import { BOOKING_STATUS as S, NOTIFICATION_TYPE as N } from '@flywise/shared/constants.js';
 import { connectDB, mongoose } from '@flywise/shared/db.js';

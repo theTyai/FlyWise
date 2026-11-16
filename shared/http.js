@@ -130,7 +130,9 @@ export async function postInternal(url, key, body, timeoutMs = 3000) {
     });
     return res.ok;
   } catch (err) {
-    console.warn(`[internal] could not reach ${url}: ${err.message}`);
+    if (process.env.FLYWISE_SEEDING !== 'true' && process.env.NODE_ENV !== 'test') {
+      console.warn(`[internal] could not reach ${url}: ${err.message}`);
+    }
     return false;
   }
 }
