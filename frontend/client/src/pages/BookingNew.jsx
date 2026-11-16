@@ -133,8 +133,12 @@ export default function BookingNew() {
                   <dd className="board text-[2rem] leading-none font-semibold">{money(offer.price, offer.currency)}</dd>
                 </div>
               </dl>
-              <Button type="submit" size="lg" loading={busy} disabled={offer.expired} className="mt-5 w-full">Send booking request</Button>
-              <p className="mt-3 text-center text-[13px] text-ink-faint">Nothing is charged. You can cancel while it is waiting for review.</p>
+              <Button type="submit" size="lg" loading={busy} disabled={offer.expired} className="mt-5 w-full btn-gradient">
+                {busy ? 'Submitting Request...' : 'Request Booking'}
+              </Button>
+              <p className="mt-2.5 text-center text-xs text-ink-faint">
+                No immediate payment required • Subject to admin seat verification
+              </p>
             </div>
           </div>
         </aside>

@@ -12,32 +12,32 @@
   --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
   --font-board: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", ui-sans-serif, sans-serif;
 
-  --color-night-950: #061533;
-  --color-night-900: #0a1f44;
-  --color-night-800: #12305f;
-  --color-night-700: #1d4079;
-  --color-night-600: #33558f;
+  --color-night-950: #070e1f;
+  --color-night-900: #0B1730;
+  --color-night-800: #12244a;
+  --color-night-700: #1d366d;
+  --color-night-600: #2d4f93;
 
-  --color-signal-50: #f1f5ff;
-  --color-signal-100: #e3ecff;
-  --color-signal-200: #c5d6ff;
-  --color-signal-500: #3d74ff;
-  --color-signal-600: #1f5bff;
-  --color-signal-700: #1546d6;
+  --color-signal-50: #eef5ff;
+  --color-signal-100: #dbe8fe;
+  --color-signal-200: #bfd8fd;
+  --color-signal-500: #2579f2;
+  --color-signal-600: #1769E0;
+  --color-signal-700: #0f52b8;
 
-  --color-mist: #f3f6fb;
+  --color-mist: #F3F6FC;
   --color-line: #dce3ef;
-  --color-ink: #0a1f44;
+  --color-ink: #0B1730;
   --color-ink-soft: #4a5a78;
   --color-ink-faint: #7c8aa5;
 
   /* recommendation roles */
-  --color-mint-50: #e6f6f1;
-  --color-mint-600: #0b8f6c;
-  --color-mint-700: #08735a;
-  --color-flare-50: #fff1e5;
-  --color-flare-600: #d9580b;
-  --color-flare-700: #b34707;
+  --color-mint-50: #e8f9f3;
+  --color-mint-600: #19B88A;
+  --color-mint-700: #12936e;
+  --color-flare-50: #fff2e8;
+  --color-flare-600: #e06217;
+  --color-flare-700: #b5490a;
 
   /* booking statuses */
   --color-wait-50: #fff5dc;
@@ -167,8 +167,36 @@
   .spin { animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* Premium card lift and micro-interactions */
+  .card-lift {
+    transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 260ms cubic-bezier(0.16, 1, 0.3, 1), border-color 200ms;
+  }
+  .card-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lift);
+  }
+
+  /* Shimmer gradient for AI badges and score cards */
+  .ai-gradient {
+    background: linear-gradient(135deg, #1769E0 0%, #19B88A 100%);
+  }
+
+  .btn-gradient {
+    background: linear-gradient(135deg, #1769E0 0%, #2579f2 100%);
+    box-shadow: 0 4px 14px -2px rgba(23, 105, 224, 0.35);
+    transition: transform 150ms, box-shadow 150ms, opacity 150ms;
+  }
+  .btn-gradient:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px -2px rgba(23, 105, 224, 0.45);
+  }
+  .btn-gradient:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .flight-plane, .toast-in { animation: none; }
+    .flight-plane, .toast-in, .card-lift { animation: none; transition: none; }
+    .card-lift:hover { transform: none; }
     .spin { animation-duration: 2s; }
     html { scroll-behavior: auto; }
   }

@@ -154,26 +154,61 @@ export default function SearchTicket({ initial, onRouteChange, notch = 'var(--co
 
           <div className="mt-4 grid gap-3 border-t border-line pt-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div>
-              <label htmlFor={ids.note} className="mb-1 block text-[13px] font-medium text-ink-faint">Anything we should weigh? Write it your way</label>
-              <input id={ids.note} className="field" maxLength={300} value={form.naturalLanguage}
+              <div className="flex items-center justify-between mb-1">
+                <label htmlFor={ids.note} className="block text-[13px] font-semibold text-ink">
+                  Personalize with Natural Language AI
+                </label>
+                <span className="text-[11px] font-medium text-signal-600 bg-signal-50 px-2 py-0.5 rounded-full">
+                  NLP Powered
+                </span>
+              </div>
+              <input
+                id={ids.note}
+                className="field"
+                maxLength={300}
+                value={form.naturalLanguage}
                 onChange={(event) => set({ naturalLanguage: event.target.value })}
-                placeholder="Morning departure, under ₹6,000, no more than three hours" />
+                placeholder="e.g. Morning departure, under ₹6,000, avoid long layovers"
+              />
+              <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
+                <span className="text-ink-faint py-0.5">Quick hints:</span>
+                {[
+                  'Morning departure',
+                  'Under ₹5,000',
+                  'Non-stop only',
+                  'Shortest trip',
+                ].map((chip) => (
+                  <button
+                    key={chip}
+                    type="button"
+                    onClick={() => {
+                      const current = form.naturalLanguage.trim();
+                      const updated = current ? `${current}, ${chip.toLowerCase()}` : chip;
+                      set({ naturalLanguage: updated });
+                    }}
+                    className="rounded-full bg-mist px-2.5 py-0.5 text-ink-soft hover:bg-signal-100 hover:text-signal-700 transition-colors border border-line"
+                  >
+                    + {chip}
+                  </button>
+                ))}
+              </div>
             </div>
+
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <div role="radiogroup" aria-label="What matters most" className="flex rounded-xl border border-line p-1">
+              <div role="radiogroup" aria-label="What matters most" className="flex rounded-xl border border-line p-1 bg-mist/50">
                 {PRIORITY_OPTIONS.map((option) => (
                   <button
                     key={option.value} type="button" role="radio" aria-checked={form.priority === option.value}
                     onClick={() => set({ priority: option.value })}
-                    className={cx('rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
-                      form.priority === option.value ? 'bg-night-900 text-white' : 'text-ink-soft hover:text-ink')}
+                    className={cx('rounded-lg px-3 py-1.5 text-xs font-bold transition-all',
+                      form.priority === option.value ? 'bg-night-900 text-white shadow-xs' : 'text-ink-soft hover:text-ink')}
                   >
                     {option.label}
                   </button>
                 ))}
               </div>
-              <label className="flex items-center gap-2 text-sm font-medium text-ink-soft">
-                <input type="checkbox" className="size-4 accent-signal-600" checked={form.nonStopOnly}
+              <label className="flex items-center gap-2 text-sm font-semibold text-ink cursor-pointer">
+                <input type="checkbox" className="size-4 accent-signal-600 rounded" checked={form.nonStopOnly}
                   onChange={(event) => set({ nonStopOnly: event.target.checked })} />
                 Non-stop only
               </label>
@@ -182,11 +217,11 @@ export default function SearchTicket({ initial, onRouteChange, notch = 'var(--co
         </div>
 
         <div className="pass-stub flex flex-col justify-center gap-2 p-4 sm:p-5">
-          <Button type="submit" size="lg" loading={busy} className="w-full">
+          <Button type="submit" size="lg" loading={busy} className="w-full btn-gradient">
             {!busy && <Search className="size-[18px]" aria-hidden="true" />}
-            {busy ? 'Searching' : 'Find flights'}
+            {busy ? 'Finding Flights...' : 'Find flights'}
           </Button>
-          <p className="text-center text-[13px] text-ink-faint">One-way trips within India</p>
+          <p className="text-center text-[11px] text-ink-faint">Authentic Indian airline timetables</p>
         </div>
       </div>
       {error && <Notice tone="error" className="mt-3">{error}</Notice>}
