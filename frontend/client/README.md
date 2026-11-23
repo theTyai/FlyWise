@@ -57,4 +57,4 @@ src/
 | `/notifications` | Notifications | Yes |
 | `/profile` | Profile | Yes |
 
-The visual language is described in [docs/design-system.md](../../docs/design-system.md).
+The visual identity and design system are described in the master [README.md](../../README.md#4-design-system--visual-identity-tokens).

@@ -33,7 +33,6 @@ app/
 └── config.py        settings from the root .env
 tests/test_ranking.py
 requirements.txt
-Dockerfile
 ```
 
 ## Settings (in the root `.env`)
@@ -46,4 +45,4 @@ Dockerfile
 | `WEIGHT_PRICE`, `WEIGHT_DURATION`, `WEIGHT_STOPS` | `0.50`, `0.35`, `0.15` | The balanced scoring weights |
 | `INTERNAL_SERVICE_KEY` | from setup | Callers must send it in the `x-internal-key` header |
 
-The formula, a worked example and the LLM guard rails are in [docs/ai-recommendation.md](../../docs/ai-recommendation.md).
+The formula, mathematical weights, worked example, and LLM guard rails are documented in the master [README.md](../../README.md#5-ai-recommendation-engine-blueprint).

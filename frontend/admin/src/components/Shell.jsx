@@ -19,18 +19,18 @@ export function DeskLogo() {
 
 const NAV = [
   { to: '/', label: 'Overview', Icon: LayoutDashboard, end: true },
-  { to: '/requests', label: 'Booking requests', Icon: ClipboardList, badge: true, permission: 'VIEW_REQUESTS' },
-  { to: '/inventory', label: 'Seat inventory', Icon: Armchair, permission: 'MANAGE_INVENTORY' },
+  { to: '/requests', label: 'Ticket Bookings', Icon: ClipboardList, badge: false, permission: 'VIEW_REQUESTS' },
+  { to: '/inventory', label: 'Seat Inventory', Icon: Armchair, permission: 'MANAGE_INVENTORY' },
   { to: '/travellers', label: 'Travellers', Icon: Users, permission: 'MANAGE_USERS' },
-  { to: '/audit', label: 'Audit log', Icon: ScrollText, permission: 'VIEW_AUDIT_LOGS' },
+  { to: '/audit', label: 'Audit Log', Icon: ScrollText, permission: 'VIEW_AUDIT_LOGS' },
   { to: '/settings', label: 'Settings', Icon: Settings, permission: 'MANAGE_SETTINGS' },
 ];
 
-// Quick filters under "Booking requests", one per decision the desk makes.
+// Quick filters under "Ticket Bookings"
 const REQUEST_VIEWS = [
+  { status: '', label: 'All Bookings' },
   { status: 'CONFIRMED', label: 'Confirmed' },
-  { status: 'REJECTED', label: 'Rejected' },
-  { status: 'REVOKED', label: 'Revoked' },
+  { status: 'CANCELLED', label: 'Cancelled' },
 ];
 
 function Sidebar({ onNavigate }) {

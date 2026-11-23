@@ -44,4 +44,4 @@ tests/               providers.test.js, validators.test.js
 
 Nothing else in the system needs to change.
 
-Endpoints are listed in [docs/api-reference.md](../../docs/api-reference.md#user-backend-httplocalhost5000).
+Endpoints are listed in the master [README.md](../../README.md#10-api-endpoint-specifications).

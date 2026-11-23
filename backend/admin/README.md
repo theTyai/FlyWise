@@ -42,6 +42,6 @@ tests/               validators.test.js, decisions.integration.test.js (needs MO
 
 ## The file to read first
 
-`src/services/decision.service.js`. Its header comment lists the reliability rules, and `confirmBooking` shows how the last seat can only be allocated once. [docs/workflows.md](../../docs/workflows.md#confirming-a-booking-in-detail) walks through it.
+`src/services/decision.service.js`. Its header comment lists the reliability rules, and `confirmBooking` shows how the last seat can only be allocated once with atomic seat operations. See the master [README.md](../../README.md#7-booking-state-machine--atomic-lifecycle) for the complete workflow.
 
-Endpoints are listed in [docs/api-reference.md](../../docs/api-reference.md#admin-backend-httplocalhost5001).
+Endpoints are listed in the master [README.md](../../README.md#10-api-endpoint-specifications).

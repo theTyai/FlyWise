@@ -855,7 +855,6 @@ Minor/
 │   ├── run-ai.mjs                       # Python ASGI runner with fallback detection
 │   └── setup.mjs                        # Monorepo setup automation
 │
-├── docs/                                # In-depth technical documentation
 ├── .env.example                         # Documented template environment file
 ├── .env                                 # Active configuration
 ├── package.json                         # Root monorepo workspace configuration

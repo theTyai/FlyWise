@@ -19,7 +19,7 @@ async function start() {
 start().catch((err) => {
   console.error('[user-backend] failed to start:', err.message);
   if (/ECONNREFUSED|server selection/i.test(err.message)) {
-    console.error('[user-backend] MongoDB is not reachable. Start it (see docs/setup-guide.md) and check MONGODB_URI in .env.');
+    console.error('[user-backend] MongoDB is not reachable. Start it (see README.md) and check MONGODB_URI in .env.');
   }
   process.exit(1);
 });

@@ -118,12 +118,11 @@ export function SeatBar({ total, available, need = 0, compact = false }) {
 }
 
 export const STATUS_TABS = [
-  { value: S.PENDING_ADMIN_APPROVAL, label: 'Waiting' },
+  { value: '', label: 'All Bookings' },
   { value: S.CONFIRMED, label: 'Confirmed' },
-  { value: S.REJECTED, label: 'Rejected' },
-  { value: S.REVOKED, label: 'Revoked' },
   { value: S.CANCELLED, label: 'Cancelled' },
-  { value: '', label: 'All' },
+  { value: S.REVOKED, label: 'Revoked' },
+  { value: S.PENDING_ADMIN_APPROVAL, label: 'Awaiting' },
 ];
 
 // Plain-language names for audit log actions.

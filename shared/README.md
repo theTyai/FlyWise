@@ -29,4 +29,4 @@ import { Button } from '@shared/ui/index.jsx';
 
 `constants.js` has no dependencies, so it is safe in the browser. `http.js`, `db.js`, `env.js` and `models/` are server-only.
 
-See [docs/database-design.md](../docs/database-design.md) for the schemas and [docs/design-system.md](../docs/design-system.md) for the design tokens.
+See the master [README.md](../README.md#6-database-design--data-dictionary) for the database schemas and [README.md](../README.md#4-design-system--visual-identity-tokens) for the design tokens.

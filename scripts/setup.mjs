@@ -92,7 +92,7 @@ if (reachable === null) {
   ok(`MongoDB is answering at ${uri.replace(/\/\/[^@/]+@/, '//')}`);
 } else {
   fail(`MongoDB is not answering at ${uri.replace(/\/\/[^@/]+@/, '//')}`);
-  console.log('        Pick one way to get a database (details in docs/setup-guide.md):');
+  console.log('        Pick one way to get a database (details in README.md):');
   console.log('          a) Install MongoDB Community Server - it then runs in the background as a service');
   console.log('          b) With Docker Desktop running:  npm run docker:db');
   console.log('          c) Create a free MongoDB Atlas cluster and put its connection string in .env as MONGODB_URI');

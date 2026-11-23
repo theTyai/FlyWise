@@ -9,12 +9,19 @@ export async function listBookings({ status, q, skip, limit }) {
   const filter = {};
   if (status) filter.status = status;
   if (q) {
-    // The search box matches a reference, flight, airline, airport code, or the traveller's name/email.
+    // The search box matches reference, flight, airline, airports, or the traveller/passengers.
     const pattern = new RegExp(escapeRegex(q), 'i');
     const users = await User.find({ $or: [{ name: pattern }, { email: pattern }] }).select('_id').limit(50);
     filter.$or = [
-      { bookingReference: pattern }, { 'flight.flightNumber': pattern }, { 'flight.airline': pattern },
-      { 'flight.origin': q.toUpperCase() }, { 'flight.destination': q.toUpperCase() },
+      { bookingReference: pattern },
+      { 'flight.flightNumber': pattern },
+      { 'flight.airline': pattern },
+      { 'flight.origin': q.toUpperCase() },
+      { 'flight.destination': q.toUpperCase() },
+      { 'passengers.firstName': pattern },
+      { 'passengers.lastName': pattern },
+      { 'contact.email': pattern },
+      { 'contact.phone': pattern },
       { userId: { $in: users.map((u) => u._id) } },
     ];
   }

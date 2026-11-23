@@ -6,23 +6,36 @@ export const publicAdmin = (a) => ({
 });
 
 // One row of the requests table. Expects userId to be populated with name/email/phone.
-export const bookingSummary = (b) => ({
-  id: String(b._id),
-  bookingReference: b.bookingReference,
-  status: b.status,
-  traveller: b.userId && b.userId.name
+export const bookingSummary = (b) => {
+  const leadPassenger = b.passengers?.[0];
+  const passengerName = leadPassenger ? `${leadPassenger.firstName} ${leadPassenger.lastName}`.trim() : 'Guest';
+  const traveller = b.userId && b.userId.name
     ? { id: String(b.userId._id), name: b.userId.name, email: b.userId.email, phone: b.userId.phone || '' }
-    : null,
-  airline: b.flight.airline,
-  flightNumber: b.flight.flightNumber,
-  origin: b.flight.origin,
-  destination: b.flight.destination,
-  departureTime: b.flight.departureTime,
-  passengerCount: b.passengers.length,
-  amount: b.pricing.amount,
-  currency: b.pricing.currency,
-  createdAt: b.createdAt,
-});
+    : { id: b.userId ? String(b.userId._id || b.userId) : null, name: passengerName, email: b.contact?.email || '', phone: b.contact?.phone || '' };
+
+  return {
+    id: String(b._id),
+    bookingReference: b.bookingReference,
+    status: b.status,
+    traveller,
+    passengers: (b.passengers || []).map((p) => ({
+      firstName: p.firstName,
+      lastName: p.lastName,
+      gender: p.gender,
+      dateOfBirth: p.dateOfBirth,
+    })),
+    contact: b.contact || null,
+    airline: b.flight.airline,
+    flightNumber: b.flight.flightNumber,
+    origin: b.flight.origin,
+    destination: b.flight.destination,
+    departureTime: b.flight.departureTime,
+    passengerCount: b.passengers.length,
+    amount: b.pricing.amount,
+    currency: b.pricing.currency,
+    createdAt: b.createdAt,
+  };
+};
 
 // Everything the request-detail screen shows about one booking.
 export const bookingDetail = (b) => ({
