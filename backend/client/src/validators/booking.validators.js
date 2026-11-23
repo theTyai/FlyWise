@@ -41,3 +41,17 @@ export const updateBookingSchema = z.object({
 export const cancelBookingSchema = z.object({ reason: z.string().trim().max(300).optional() }).strict();
 
 export const listBookingsSchema = z.object({ status: z.enum(STORED_STATUSES).optional() });
+
+export const lockSeatSchema = z.object({
+  offerId: z.string().refine(isValidId, 'Choose a flight offer first'),
+  seats: z.number().int().min(1).max(MAX_PASSENGERS).optional().default(1),
+}).strict();
+
+export const confirmPaymentSchema = z.object({
+  lockKey: z.string().optional(),
+  offerId: z.string().refine(isValidId, 'Choose a flight first'),
+  passengers: z.array(passengerSchema).min(1).max(MAX_PASSENGERS),
+  contact: contactSchema,
+  paymentMethod: z.string().max(40).optional().default('DEMO_PASS'),
+  acknowledgeTerms: z.boolean().optional().default(true),
+}).strict();

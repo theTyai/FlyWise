@@ -9,6 +9,7 @@
     "start": "node src/server.js",
     "seed": "node src/scripts/seedAdmin.js",
     "seed:demo": "node src/scripts/seedDemo.js",
+    "seed:massive": "node src/scripts/seedMassive.js",
     "db:reset": "node src/scripts/resetDb.js",
     "test": "node --test"
   },

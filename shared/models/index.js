@@ -11,6 +11,8 @@ export { Admin } from './admin.model.js';
 export { Search, FlightOffer, flightFields } from './flight.model.js';
 export { BookingRequest } from './booking.model.js';
 export { SeatInventory, SeatAllocation } from './inventory.model.js';
+export { Ticket } from './ticket.model.js';
+export { SeatLock } from './seatLock.model.js';
 export { Notification } from './notification.model.js';
 export { AuditLog } from './audit.model.js';
 export { Setting, Counter, getSettings, nextBookingReference } from './setting.model.js';

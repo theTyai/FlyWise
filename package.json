@@ -19,6 +19,7 @@
     "check": "node scripts/check.mjs",
     "seed:admin": "npm run seed -w @flywise/admin-backend",
     "seed:demo": "npm run seed:demo -w @flywise/admin-backend",
+    "seed:massive": "npm run seed:massive -w @flywise/admin-backend",
     "db:reset": "npm run db:reset -w @flywise/admin-backend --"
   },
   "devDependencies": {

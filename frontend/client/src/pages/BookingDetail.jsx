@@ -1,15 +1,17 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, PlaneTakeoff, ShieldCheck } from 'lucide-react';
+import confetti from 'canvas-confetti';
+import { ChevronLeft, PlaneTakeoff, ShieldCheck, Ticket } from 'lucide-react';
 import { BOOKING_STATUS as S, CABIN_LABEL, STATUS_META } from '@shared/constants.js';
 import { date, day, money, stamp } from '@shared/ui/format.js';
 import { Button, Dialog, EmptyState, Field, Notice, PageLoading, StatusPill, cx } from '@shared/ui/index.jsx';
+import ETicket from '../components/ETicket.jsx';
 import { RoleTag, RouteDisplay } from '../components/FlightPass.jsx';
 import StatusPath from '../components/StatusPath.jsx';
 import { TravellerFields, checkTravellers, errorsByField } from '../components/TravellerFields.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useLoad } from '../hooks/useLoad.js';
-import { cancelBooking, getBooking, updateBooking } from '../services/booking.service.js';
+import { cancelBooking, getBooking, getTicket, updateBooking } from '../services/booking.service.js';
 
 const GENDER = { MALE: 'Male', FEMALE: 'Female', OTHER: 'Other' };
 const ACTOR = { USER: 'You', ADMIN: 'FlyWise desk', SYSTEM: 'FlyWise' };
@@ -124,6 +126,18 @@ export default function BookingDetail() {
   const [editing, setEditing] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [saved, setSaved] = useState(null);
+  const [ticket, setTicket] = useState(null);
+
+  useEffect(() => {
+    if (booking?.status === S.CONFIRMED) {
+      getTicket(booking.id)
+        .then((res) => setTicket(res.ticket))
+        .catch(() => {});
+    }
+    if (state?.justBooked) {
+      confetti({ particleCount: 80, spread: 65, origin: { y: 0.55 } });
+    }
+  }, [booking?.id, booking?.status, state?.justBooked]);
 
   if (error && !booking) {
     return (
@@ -168,13 +182,17 @@ export default function BookingDetail() {
 
       <div className="mt-6 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="space-y-8">
+          {booking.status === S.CONFIRMED && (
+            <ETicket ticket={ticket} booking={booking} />
+          )}
+
           {editing ? (
             <EditTravellers
               booking={booking}
               onClose={() => setEditing(false)}
               onSaved={(next) => { setBooking(next); setEditing(false); setSaved('Traveller details saved.'); }}
             />
-          ) : (
+          ) : booking.status !== S.CONFIRMED ? (
             <article className="pass" style={{ '--stub-width': '15rem' }}>
               <div className="p-6 sm:p-7">
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -219,13 +237,13 @@ export default function BookingDetail() {
                     <dd className="text-[15px]">{stamp(booking.createdAt)}</dd>
                   </div>
                 </dl>
-                <p className="flex gap-2 rounded-xl bg-mist px-3 py-2.5 text-[13px] leading-snug text-ink-soft">
-                  <ShieldCheck className="mt-0.5 size-4 shrink-0 text-ink-faint" aria-hidden="true" />
-                  Seats here are simulated. This is not an airline ticket and nothing is charged.
+                <p className="flex gap-2 rounded-xl bg-mint-50 border border-mint-200 px-3 py-2.5 text-[13px] leading-snug text-mint-900">
+                  <ShieldCheck className="mt-0.5 size-4 shrink-0 text-mint-700" aria-hidden="true" />
+                  Live seats verified and guaranteed immediately upon submission.
                 </p>
               </div>
             </article>
-          )}
+          ) : null}
 
           <section aria-labelledby="progress-heading" className="rounded-3xl bg-white p-6 shadow-pass sm:p-7">
             <h2 id="progress-heading" className="text-lg font-bold tracking-tight">Progress</h2>

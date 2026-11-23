@@ -2,6 +2,7 @@
 
 Supported LLM_PROVIDER values:
   none      - no LLM; callers use deterministic results
+  gemini    - Google Gemini via Generative Language REST API (free tier)
   anthropic - Claude via the Messages API
   openai    - any OpenAI-compatible chat-completions endpoint
 """
@@ -19,6 +20,8 @@ class LLMError(RuntimeError):
 
 
 def is_configured() -> bool:
+    if settings.llm_provider == "gemini":
+        return bool(settings.gemini_api_key)
     if settings.llm_provider == "anthropic":
         return bool(settings.anthropic_api_key)
     if settings.llm_provider == "openai":
@@ -53,6 +56,25 @@ def complete(system: str, user: str, max_tokens: int = 700) -> str:
     if not is_configured():
         raise LLMError("No LLM provider configured")
     try:
+        if settings.llm_provider == "gemini":
+            model = settings.llm_model or "gemini-1.5-flash"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={settings.gemini_api_key}"
+            body = {
+                "contents": [
+                    {
+                        "role": "user",
+                        "parts": [{"text": f"{system}\n\nStrict Output Requirement: Respond with valid JSON only.\n\nInput:\n{user}"}],
+                    }
+                ],
+                "generationConfig": {
+                    "maxOutputTokens": max_tokens,
+                    "temperature": 0.2,
+                    "responseMimeType": "application/json",
+                },
+            }
+            data = _post(url, {}, body)
+            return data["candidates"][0]["content"]["parts"][0]["text"]
+
         if settings.llm_provider == "anthropic":
             data = _post(
                 "https://api.anthropic.com/v1/messages",

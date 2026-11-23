@@ -10,10 +10,11 @@ import { BOOKING_STATUS as S, NOTIFICATION_TYPE as N } from '@flywise/shared/con
 import { isValidId, withTransaction } from '@flywise/shared/db.js';
 import { ApiError } from '@flywise/shared/http.js';
 import {
-  BookingRequest, FlightOffer, Search, SeatAllocation, SeatInventory, getSettings, nextBookingReference,
+  BookingRequest, FlightOffer, Search, SeatAllocation, SeatInventory, SeatLock, Ticket, getSettings, nextBookingReference,
 } from '@flywise/shared/models.js';
-import { serializeBooking } from '../utils/serializers.js';
+import { serializeBooking, serializeTicket } from '../utils/serializers.js';
 import { notifyDesk, notifyUser } from './notification.service.js';
+import { createTicketForBooking } from './ticket.service.js';
 
 const OPEN_STATUSES = [S.PENDING_ADMIN_APPROVAL, S.PRICE_REVALIDATION, S.ALLOCATION_IN_PROGRESS, S.CONFIRMED];
 
@@ -143,6 +144,8 @@ export async function createBooking(user, { offerId, passengers, contact }) {
     return created;
   });
 
+  const ticket = await createTicketForBooking(booking);
+
   // Real-time broadcasts and notification
   await notifyUser({
     userId: user._id,
@@ -155,7 +158,114 @@ export async function createBooking(user, { offerId, passengers, contact }) {
   notifyDesk('booking:new', booking);
   notifyDesk('booking:confirmed', booking);
 
-  return serializeBooking(booking);
+  return {
+    booking: serializeBooking(booking),
+    ticket: ticket ? serializeTicket(ticket) : null,
+  };
+}
+
+// ---- Create from Active Seat Lock (Payment Completion Flow) ----
+export async function confirmBookingWithPayment(user, { lockKey, offerId, passengers, contact, paymentMethod = 'DEMO_PASS' }) {
+  const offer = await FlightOffer.findById(offerId);
+  if (!offer) throw new ApiError(404, 'OFFER_NOT_FOUND', 'This fare no longer exists. Search again to see current fares.');
+
+  // Validate or locate active seat lock
+  let lock = null;
+  if (lockKey) {
+    lock = await SeatLock.findOne({ lockKey, userId: user._id });
+    if (!lock || lock.status !== 'LOCKED' || lock.expiresAt.getTime() <= Date.now()) {
+      throw new ApiError(410, 'LOCK_EXPIRED', 'Your seat hold has expired. Please select the flight again.');
+    }
+  }
+
+  if (passengers.length !== offer.passengerCount) {
+    throw new ApiError(400, 'PASSENGER_COUNT_MISMATCH', `This fare is for ${offer.passengerCount} traveller(s). Enter details for each one.`);
+  }
+
+  const search = await Search.findById(offer.searchId);
+  const pick = search?.recommendations.find((r) => String(r.offerId) === String(offer._id));
+  const flight = flightSnapshot(offer);
+  const seatsNeeded = passengers.length;
+  const flightKey = offer.flightKey;
+
+  const booking = await withTransaction(async (session) => {
+    const sessionOpt = session ? { session } : {};
+
+    // If lock was not used (or fallback), deduct seats now
+    if (!lock) {
+      const inventory = await SeatInventory.findOneAndUpdate(
+        { flightKey, availableSeats: { $gte: seatsNeeded } },
+        { $inc: { availableSeats: -seatsNeeded } },
+        { new: true, ...sessionOpt },
+      );
+      if (!inventory) {
+        throw new ApiError(409, 'NO_SEATS_AVAILABLE', `Seats on ${offer.flightNumber} are no longer available.`);
+      }
+    } else {
+      // Mark lock as confirmed
+      await SeatLock.updateOne({ _id: lock._id }, { $set: { status: 'CONFIRMED' } }, sessionOpt);
+    }
+
+    const bookingRef = await nextBookingReference(session);
+
+    const [created] = await BookingRequest.create([{
+      bookingReference: bookingRef,
+      userId: user._id,
+      searchId: offer.searchId,
+      offerId: offer._id,
+      recommendationCategory: pick?.category || null,
+      flight: {
+        ...flight,
+      },
+      passengers,
+      contact,
+      pricing: {
+        amount: offer.price,
+        currency: offer.currency,
+        perPassenger: offer.pricePerPassenger,
+        passengerCount: offer.passengerCount,
+      },
+      status: S.CONFIRMED,
+      adminDecision: {
+        action: 'CONFIRM',
+        reason: 'Instant automated seat verification & payment confirmation',
+        decidedAt: new Date(),
+        adminName: 'Automated Seat Allocation Engine',
+      },
+      history: [
+        { status: S.ALLOCATION_IN_PROGRESS, actor: 'SYSTEM', note: 'Lock verified & payment approved' },
+        { status: S.CONFIRMED, actor: 'SYSTEM', note: `Payment successful (${paymentMethod}). ${seatsNeeded} seat(s) confirmed.` },
+      ],
+    }], sessionOpt);
+
+    await SeatAllocation.create([{
+      bookingId: created._id,
+      flightKey,
+      seats: seatsNeeded,
+      status: 'ACTIVE',
+    }], sessionOpt);
+
+    return created;
+  });
+
+  const paymentRef = `TXN-${paymentMethod}-${Date.now().toString(36).toUpperCase()}`;
+  const ticket = await createTicketForBooking(booking, paymentRef);
+
+  await notifyUser({
+    userId: user._id,
+    booking,
+    type: N.BOOKING_CONFIRMED,
+    title: 'Booking & Payment confirmed!',
+    message: `${booking.bookingReference}: Your flight ${flight.airline} ${flight.flightNumber} is confirmed! Ticket #${ticket.ticketNumber} issued.`,
+  });
+
+  notifyDesk('booking:new', booking);
+  notifyDesk('booking:confirmed', booking);
+
+  return {
+    booking: serializeBooking(booking),
+    ticket: serializeTicket(ticket),
+  };
 }
 
 // ---- Read ----
@@ -233,6 +343,12 @@ export async function cancelBooking(user, bookingId, reason = '') {
         sessionOpt,
       );
     }
+
+    await Ticket.updateOne(
+      { bookingId: current._id },
+      { $set: { status: 'CANCELLED' } },
+      sessionOpt,
+    );
 
     return updated;
   });

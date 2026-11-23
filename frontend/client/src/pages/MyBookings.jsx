@@ -134,8 +134,10 @@ export default function MyBookings() {
 
       {bookings && bookings.length > 0 && (
         <div className="mt-8">
-          <Section id="waiting" title="Waiting for review" lead="The desk checks seat inventory and confirms or rejects. You can still edit or cancel these." bookings={groups.waiting} />
-          <Section id="upcoming" title="Upcoming" bookings={groups.upcoming} />
+          <Section id="upcoming" title="Confirmed Upcoming Trips" lead="Confirmed electronic tickets ready for boarding." bookings={groups.upcoming} />
+          {groups.waiting.length > 0 && (
+            <Section id="waiting" title="Processing Bookings" lead="Bookings undergoing seat allocation or payment verification." bookings={groups.waiting} />
+          )}
           <Section id="past" title="Past and closed" bookings={groups.past} muted />
         </div>
       )}

@@ -181,6 +181,61 @@
     background: linear-gradient(135deg, #1769E0 0%, #19B88A 100%);
   }
 
+  /* Glassmorphism & Modern glow utilities */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(220, 227, 239, 0.8);
+  }
+
+  .glass-dark {
+    background: rgba(11, 23, 48, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .glow-blue {
+    box-shadow: 0 0 40px -10px rgba(23, 105, 224, 0.4);
+  }
+
+  .glow-mint {
+    box-shadow: 0 0 40px -10px rgba(25, 184, 138, 0.35);
+  }
+
+  /* Marquee animation for departure board ticker */
+  @keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .animate-marquee {
+    display: flex;
+    width: max-content;
+    animation: marquee 32s linear infinite;
+  }
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
+
+  /* Floating animation */
+  @keyframes float-slow {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+  .animate-float {
+    animation: float-slow 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.08); }
+  }
+  .animate-pulse-glow {
+    animation: pulse-glow 6s ease-in-out infinite;
+  }
+
   .btn-gradient {
     background: linear-gradient(135deg, #1769E0 0%, #2579f2 100%);
     box-shadow: 0 4px 14px -2px rgba(23, 105, 224, 0.35);

@@ -111,20 +111,36 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-screen flex-col bg-mist">
-      <header className={cx('transition-colors', dark ? 'bg-night-900' : 'sticky top-0 z-30 border-b border-line bg-white/95 backdrop-blur-md')}>
+      <header className={cx(
+        'sticky top-0 z-40 transition-all duration-200',
+        dark
+          ? 'border-b border-white/10 bg-night-950/80 backdrop-blur-xl'
+          : 'border-b border-line bg-white/85 backdrop-blur-xl shadow-xs'
+      )}>
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5">
           <div className="flex items-center gap-8">
             <Logo dark={dark} />
             <nav className="hidden items-center gap-1 md:flex" aria-label="Main Navigation">
               <NavLink to="/" end className={link}>Explore Flights</NavLink>
+              <NavLink to="/how-we-work" className={link}>How We Work</NavLink>
               {user && <NavLink to="/trips" className={link}>My Bookings</NavLink>}
-              <a href="#how-it-works" className={cx('rounded-xl px-3.5 py-2 text-[14px] font-semibold transition-colors', dark ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-ink-soft hover:bg-mist hover:text-ink')}>
-                How AI Works
-              </a>
             </nav>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            {/* Live Engine Indicator */}
+            <div className={cx(
+              'hidden lg:flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold border tracking-wide',
+              dark
+                ? 'border-white/15 bg-white/5 text-white/90'
+                : 'border-mint-600/20 bg-mint-50/70 text-mint-700'
+            )}>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-mint-600 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-mint-600"></span>
+              </span>
+              <span>Gemini AI & Live Seats Online</span>
+            </div>
             {ready && user && (
               <>
                 <Link
@@ -172,6 +188,9 @@ export default function Layout() {
             <nav className="flex flex-col gap-2">
               <Link to="/" onClick={() => setMobileMenu(false)} className="rounded-xl px-4 py-2.5 text-sm font-semibold hover:bg-mist">
                 Explore Flights
+              </Link>
+              <Link to="/how-we-work" onClick={() => setMobileMenu(false)} className="rounded-xl px-4 py-2.5 text-sm font-semibold hover:bg-mist">
+                How We Work
               </Link>
               {user ? (
                 <>
@@ -221,6 +240,7 @@ export default function Layout() {
               <h4 className="text-xs font-bold uppercase tracking-wider text-ink-faint">Platform</h4>
               <ul className="mt-3 space-y-2 text-sm text-ink-soft">
                 <li><Link to="/" className="hover:text-signal-600 transition-colors">Search Flights</Link></li>
+                <li><Link to="/how-we-work" className="hover:text-signal-600 transition-colors">How We Work (Architecture)</Link></li>
                 <li><Link to="/trips" className="hover:text-signal-600 transition-colors">My Bookings</Link></li>
                 <li><Link to="/notifications" className="hover:text-signal-600 transition-colors">Live Notifications</Link></li>
               </ul>

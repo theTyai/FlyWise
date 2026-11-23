@@ -3,8 +3,33 @@
 // hashes, admin ids and idempotency keys can never leak by accident.
 
 export const publicUser = (u) => ({
-  id: String(u._id), name: u.name, email: u.email, phone: u.phone || '', role: u.role,
-  accountStatus: u.accountStatus, createdAt: u.createdAt,
+  id: String(u._id),
+  name: u.name,
+  email: u.email,
+  phone: u.phone || '',
+  gender: u.gender || '',
+  dateOfBirth: u.dateOfBirth || '',
+  nationality: u.nationality || 'Indian',
+  idType: u.idType || '',
+  address: u.address || { line1: '', line2: '', city: '', state: '', pincode: '' },
+  profileComplete: Boolean(u.profileComplete),
+  role: u.role,
+  accountStatus: u.accountStatus,
+  createdAt: u.createdAt,
+});
+
+export const serializeTicket = (t) => ({
+  id: String(t._id),
+  bookingId: String(t.bookingId),
+  ticketNumber: t.ticketNumber,
+  pnr: t.pnr,
+  flight: t.flight,
+  passengers: t.passengers,
+  totalFare: t.totalFare,
+  paymentReference: t.paymentReference,
+  qrData: t.qrData,
+  status: t.status,
+  issuedAt: t.issuedAt,
 });
 
 export const serializeNotification = (n) => ({

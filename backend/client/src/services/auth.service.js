@@ -19,10 +19,29 @@ export async function register({ name, email, phone, password }) {
 }
 
 export async function login({ email, password }) {
-  const user = await User.findOne({ email }).select('+passwordHash');
-  const matches = user ? await bcrypt.compare(password, user.passwordHash) : false;
-  // One message for "no such account" and "wrong password", so emails cannot be probed.
-  if (!matches) throw new ApiError(401, 'BAD_CREDENTIALS', 'Email or password is incorrect');
+  const user = await User.findOne({ email }).select('+passwordHash +failedLoginAttempts +lockUntil');
+  if (!user) throw new ApiError(401, 'BAD_CREDENTIALS', 'Email or password is incorrect');
+
+  if (user.lockUntil && user.lockUntil > new Date()) {
+    const minutesLeft = Math.max(1, Math.ceil((user.lockUntil.getTime() - Date.now()) / 60000));
+    throw new ApiError(403, 'ACCOUNT_LOCKED', `Account is temporarily locked due to excessive failed attempts. Try again in ${minutesLeft} minute(s).`);
+  }
+
+  const matches = await bcrypt.compare(password, user.passwordHash);
+  if (!matches) {
+    const attempts = (user.failedLoginAttempts || 0) + 1;
+    const lock = attempts >= 10 ? new Date(Date.now() + 15 * 60 * 1000) : null;
+    await User.updateOne({ _id: user._id }, { $set: { failedLoginAttempts: attempts, lockUntil: lock } });
+    if (lock) {
+      throw new ApiError(403, 'ACCOUNT_LOCKED', 'Account has been temporarily locked for 15 minutes due to 10 consecutive failed attempts.');
+    }
+    throw new ApiError(401, 'BAD_CREDENTIALS', 'Email or password is incorrect');
+  }
+
+  if (user.failedLoginAttempts || user.lockUntil) {
+    await User.updateOne({ _id: user._id }, { $set: { failedLoginAttempts: 0, lockUntil: null } });
+  }
+
   if (user.accountStatus !== 'ACTIVE') throw new ApiError(403, 'ACCOUNT_SUSPENDED', 'This account is suspended');
   return session(user);
 }

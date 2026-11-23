@@ -56,7 +56,9 @@ def _float(name: str, default: float) -> float:
 class Settings:
     def __init__(self) -> None:
         self.llm_provider = os.environ.get("LLM_PROVIDER", "none").strip().lower() or "none"
-        self.llm_model = os.environ.get("LLM_MODEL", "claude-3-5-haiku-20241022").strip()
+        default_model = "gemini-1.5-flash" if self.llm_provider == "gemini" else "claude-3-5-haiku-20241022"
+        self.llm_model = os.environ.get("LLM_MODEL", default_model).strip()
+        self.gemini_api_key = os.environ.get("GEMINI_API_KEY", "").strip()
         self.anthropic_api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
         self.openai_api_key = os.environ.get("OPENAI_API_KEY", "").strip()
         self.openai_base_url = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
